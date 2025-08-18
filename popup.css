@@ -397,6 +397,34 @@ body {
   margin-bottom: 20px;
 }
 
+/* Word Definition */
+.word-definition {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.word-main {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 8px;
+}
+
+.word-type {
+  font-size: 14px;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.word-meanings {
+  font-size: 16px;
+  color: #495057;
+  line-height: 1.5;
+}
+
 .translation-item {
   padding: 16px;
   background: #f8f9fa;
