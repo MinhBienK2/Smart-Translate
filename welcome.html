@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Smart Translate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .welcome-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .welcome-header {
+            margin-bottom: 30px;
+        }
+
+        .welcome-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .features-list {
+            text-align: left;
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .feature-description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .get-started-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .get-started-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .version {
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <div class="welcome-header">
+            <div class="welcome-icon">🌐</div>
+            <h1 class="welcome-title">Welcome to Smart Translate!</h1>
+            <p class="welcome-subtitle">Your powerful translation companion for the web</p>
+        </div>
+
+        <div class="features-list">
+            <div class="feature-item">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-text">
+                    <div class="feature-title">Instant Translation</div>
+                    <div class="feature-description">Translate text instantly with just a click</div>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">📄</div>
+                <div class="feature-text">
+                    <div class="feature-title">Page Translation</div>
+                    <div class="feature-description">Translate entire web pages with ease</div>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">✏️</div>
+                <div class="feature-text">
+                    <div class="feature-title">Text Selection</div>
+                    <div class="feature-description">Select any text and translate it instantly</div>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">🌍</div>
+                <div class="feature-text">
+                    <div class="feature-title">Multiple Languages</div>
+                    <div class="feature-description">Support for 14+ languages including auto-detection</div>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">💾</div>
+                <div class="feature-text">
+                    <div class="feature-title">Translation History</div>
+                    <div class="feature-description">Keep track of your translations</div>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">⚙️</div>
+                <div class="feature-text">
+                    <div class="feature-title">Customizable Settings</div>
+                    <div class="feature-description">Personalize your translation experience</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="get-started-btn" onclick="getStarted()">Get Started!</button>
+
+        <div class="footer">
+            <p>Smart Translate is now ready to use!</p>
+            <p>Click the extension icon in your browser toolbar to start translating.</p>
+            <div class="version">Version 1.0.0</div>
+        </div>
+    </div>
+
+    <script>
+        function getStarted() {
+            // Close the welcome page
+            window.close();
+        }
+
+        // Auto-close after 30 seconds
+        setTimeout(() => {
+            window.close();
+        }, 30000);
+    </script>
+</body>
+</html>

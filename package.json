@@ -1,0 +1,43 @@
+{
+  "name": "smart-translate-extension",
+  "version": "1.0.0",
+  "description": "A powerful and modern browser extension for instant translation, similar to Google Translate but with enhanced features and a beautiful user interface.",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'Extension built successfully!'",
+    "test": "echo 'No tests specified'",
+    "lint": "echo 'No linter specified'",
+    "package": "echo 'Package the extension for distribution'"
+  },
+  "keywords": [
+    "browser-extension",
+    "translation",
+    "chrome-extension",
+    "translate",
+    "language",
+    "vietnamese",
+    "web-extension",
+    "manifest-v3"
+  ],
+  "author": "Smart Translate Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/smart-translate-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/smart-translate-extension/issues"
+  },
+  "homepage": "https://github.com/yourusername/smart-translate-extension#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "manifest": {
+    "version": 3,
+    "name": "Smart Translate",
+    "version": "1.0.0",
+    "description": "A powerful translation extension that translates text on web pages instantly"
+  }
+}
