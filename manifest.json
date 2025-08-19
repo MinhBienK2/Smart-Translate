@@ -10,7 +10,7 @@
   ],
   "host_permissions": [
     "https://translate.googleapis.com/*",
-    "https://api.mymemory.translated.net/*"
+    "https://translate-pa.googleapis.com/*"
   ],
   "action": {
     "default_popup": "popup.html",

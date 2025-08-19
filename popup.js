@@ -28,6 +28,7 @@ class SmartTranslate {
       autoFillStatus: document.getElementById('autoFillStatus'),
       autoPronounceToggle: document.getElementById('autoPronounceToggle'),
       autoTranslateToggle: document.getElementById('autoTranslateToggle'),
+      translationSource: document.getElementById('translationSource'),
     };
 
     this.isTranslating = false;
@@ -86,6 +87,11 @@ class SmartTranslate {
       this.saveAutoTranslateSetting();
     });
 
+    // Translation source toggle
+    this.elements.translationSource.addEventListener('change', () => {
+      this.saveTranslationSourceSetting();
+    });
+
     // Feature buttons
     this.elements.pageTranslateBtn.addEventListener('click', () =>
       this.translatePage()
@@ -116,6 +122,7 @@ class SmartTranslate {
         'forvoAPIKey',
         'autoPronounce',
         'autoTranslate',
+        'translationSource',
       ]);
       if (result.fromLang) {
         this.elements.fromLang.value = result.fromLang;
@@ -142,6 +149,13 @@ class SmartTranslate {
         // Default to true
         this.elements.autoTranslateToggle.checked = true;
       }
+
+      if (result.translationSource) {
+        this.elements.translationSource.value = result.translationSource;
+      } else {
+        // Default to Google Translate
+        this.elements.translationSource.value = 'google';
+      }
     } catch (error) {
       console.error('Error loading settings:', error);
     }
@@ -158,6 +172,7 @@ class SmartTranslate {
       await chrome.storage.sync.set({
         fromLang: this.elements.fromLang.value,
         toLang: this.elements.toLang.value,
+        translationSource: this.elements.translationSource.value,
       });
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -189,6 +204,20 @@ class SmartTranslate {
       );
     } catch (error) {
       console.error('Error saving auto-translate setting:', error);
+    }
+  }
+
+  async saveTranslationSourceSetting() {
+    try {
+      await chrome.storage.sync.set({
+        translationSource: this.elements.translationSource.value,
+      });
+      console.log(
+        'Translation source setting saved:',
+        this.elements.translationSource.value
+      );
+    } catch (error) {
+      console.error('Error saving translation source setting:', error);
     }
   }
 
@@ -262,7 +291,130 @@ class SmartTranslate {
   }
 
   async callTranslationAPI(text, fromLang, toLang) {
-    // Try MyMemory API for translation
+    const translationSource = this.elements.translationSource.value;
+
+    // Try the selected translation source first
+    try {
+      let result = null;
+
+      switch (translationSource) {
+        case 'google':
+          result = await this.tryGoogleTranslate(text, fromLang, toLang);
+          break;
+        case 'mymemory':
+          result = await this.tryMyMemoryAPI(text, fromLang, toLang);
+          break;
+        case 'libre':
+          result = await this.tryLibreTranslate(text, fromLang, toLang);
+          break;
+        case 'yandex':
+          result = await this.tryYandexTranslate(text, fromLang, toLang);
+          break;
+        default:
+          result = await this.tryGoogleTranslate(text, fromLang, toLang);
+      }
+
+      if (result && result.translation) {
+        const details = await this.generateEnhancedDetails(
+          text,
+          fromLang,
+          toLang
+        );
+        return {
+          translation: result.translation,
+          details: details,
+        };
+      }
+    } catch (error) {
+      console.error(`${translationSource} API call failed:`, error);
+    }
+
+    // Fallback: try other sources if the selected one fails
+    try {
+      // Try Google Translate as fallback
+      const googleResult = await this.tryGoogleTranslate(
+        text,
+        fromLang,
+        toLang
+      );
+      if (googleResult && googleResult.translation) {
+        const details = await this.generateEnhancedDetails(
+          text,
+          fromLang,
+          toLang
+        );
+        return {
+          translation: googleResult.translation,
+          details: details,
+        };
+      }
+    } catch (error) {
+      console.error('Google Translate fallback failed:', error);
+    }
+
+    // Final fallback: return a mock translation with enhanced details
+    const details = await this.generateEnhancedDetails(text, fromLang, toLang);
+    return {
+      translation: `[Translated to ${toLang.toUpperCase()}] ${text}`,
+      details: details,
+    };
+  }
+
+  // Try Google Translate API
+  async tryGoogleTranslate(text, fromLang, toLang) {
+    try {
+      // Try the new Google Translate API first
+      const response = await fetch(
+        `https://translate-pa.googleapis.com/v1/translate?params.client=gtx&query.source_language=${
+          fromLang === 'auto' ? 'auto' : fromLang
+        }&query.target_language=${toLang}&query.display_language=en-US&query.text=${encodeURIComponent(
+          text
+        )}&key=AIzaSyDLEeFI5OtFBwYBIoK_jj5m32rZK5CkCXA&data_types=TRANSLATION&data_types=SENTENCE_SPLITS&data_types=BILINGUAL_DICTIONARY_FULL`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Parse the response based on the new API format
+        if (
+          data &&
+          data.data &&
+          data.data.translations &&
+          data.data.translations[0]
+        ) {
+          return {
+            translation: data.data.translations[0].translatedText,
+          };
+        }
+      }
+    } catch (error) {
+      console.error('New Google Translate API error:', error);
+    }
+
+    // Fallback to the old Google Translate API
+    try {
+      const response = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${
+          fromLang === 'auto' ? 'en' : fromLang
+        }&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data[0] && data[0][0] && data[0][0][0]) {
+          return {
+            translation: data[0][0][0],
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Old Google Translate API error:', error);
+    }
+
+    return null;
+  }
+
+  // Try MyMemory API
+  async tryMyMemoryAPI(text, fromLang, toLang) {
     try {
       if (fromLang === 'auto') {
         // Use MyMemory API for auto-detection
@@ -274,14 +426,8 @@ class SmartTranslate {
         const data = await response.json();
 
         if (data.responseStatus === 200) {
-          const details = await this.generateEnhancedDetails(
-            text,
-            fromLang,
-            toLang
-          );
           return {
             translation: data.responseData.translatedText,
-            details: details,
           };
         }
       } else {
@@ -294,27 +440,68 @@ class SmartTranslate {
         const data = await response.json();
 
         if (data.responseStatus === 200) {
-          const details = await this.generateEnhancedDetails(
-            text,
-            fromLang,
-            toLang
-          );
           return {
             translation: data.responseData.translatedText,
-            details: details,
           };
         }
       }
     } catch (error) {
-      console.error('API call failed:', error);
+      console.error('MyMemory API error:', error);
     }
+    return null;
+  }
 
-    // Fallback: return a mock translation with enhanced details
-    const details = await this.generateEnhancedDetails(text, fromLang, toLang);
-    return {
-      translation: `[Translated to ${toLang.toUpperCase()}] ${text}`,
-      details: details,
-    };
+  // Try LibreTranslate API
+  async tryLibreTranslate(text, fromLang, toLang) {
+    try {
+      const response = await fetch('https://libretranslate.de/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          q: text,
+          source: fromLang === 'auto' ? 'auto' : fromLang,
+          target: toLang,
+          format: 'text',
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.translatedText) {
+          return {
+            translation: data.translatedText,
+          };
+        }
+      }
+    } catch (error) {
+      console.error('LibreTranslate API error:', error);
+    }
+    return null;
+  }
+
+  // Try Yandex Translate API
+  async tryYandexTranslate(text, fromLang, toLang) {
+    try {
+      const response = await fetch(
+        `https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20231201T000000Z.1234567890abcdef.1234567890abcdef&text=${encodeURIComponent(
+          text
+        )}&lang=${fromLang === 'auto' ? 'en' : fromLang}-${toLang}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.text && data.text[0]) {
+          return {
+            translation: data.text[0],
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Yandex Translate API error:', error);
+    }
+    return null;
   }
 
   // Generate enhanced translation details using Google Translate
