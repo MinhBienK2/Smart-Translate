@@ -3,6 +3,11 @@ class SmartTranslate {
     this.init();
     this.bindEvents();
     this.loadSettings();
+
+    // Ensure pronunciation visibility is updated after everything is loaded
+    setTimeout(() => {
+      this.updatePronunciationVisibility();
+    }, 100);
   }
 
   init() {
@@ -13,8 +18,13 @@ class SmartTranslate {
       inputText: document.getElementById('inputText'),
       wordDisplay: document.getElementById('wordDisplay'),
       displayedWord: document.getElementById('displayedWord'),
+      ggPronunciationLabel: document.getElementById('ggPronunciationLabel'),
       usPronunciationLabel: document.getElementById('usPronunciationLabel'),
       ukPronunciationLabel: document.getElementById('ukPronunciationLabel'),
+      ggPronunciationItem: document.getElementById('ggPronunciationItem'),
+      usPronunciationItem: document.getElementById('usPronunciationItem'),
+      ukPronunciationItem: document.getElementById('ukPronunciationItem'),
+      ggPhonetic: document.getElementById('ggPhonetic'),
       usPhonetic: document.getElementById('usPhonetic'),
       ukPhonetic: document.getElementById('ukPhonetic'),
 
@@ -22,14 +32,23 @@ class SmartTranslate {
       resultSection: document.getElementById('resultSection'),
       translatedText: document.getElementById('translatedText'),
       copyBtn: document.getElementById('copyBtn'),
-      pageTranslateBtn: document.getElementById('pageTranslateBtn'),
-      selectionBtn: document.getElementById('selectionBtn'),
       settingsBtn: document.getElementById('settingsBtn'),
+      savedWordsBtn: document.getElementById('savedWordsBtn'),
+      saveWordBtn: document.getElementById('saveWordBtn'),
+      savedWordsSection: document.getElementById('savedWordsSection'),
+      savedWordsList: document.getElementById('savedWordsList'),
       autoFillStatus: document.getElementById('autoFillStatus'),
       autoPronounceToggle: document.getElementById('autoPronounceToggle'),
       autoTranslateToggle: document.getElementById('autoTranslateToggle'),
       showSelectionIconToggle: document.getElementById(
         'showSelectionIconToggle'
+      ),
+      defaultPronunciation: document.getElementById('defaultPronunciation'),
+      showUsPronunciationToggle: document.getElementById(
+        'showUsPronunciationToggle'
+      ),
+      showUkPronunciationToggle: document.getElementById(
+        'showUkPronunciationToggle'
       ),
       translationSource: document.getElementById('translationSource'),
     };
@@ -58,6 +77,9 @@ class SmartTranslate {
       this.translateText()
     );
 
+    this.elements.ggPronunciationLabel.addEventListener('click', () =>
+      this.pronounceWord('gg')
+    );
     this.elements.usPronunciationLabel.addEventListener('click', () =>
       this.pronounceWord('us')
     );
@@ -80,6 +102,13 @@ class SmartTranslate {
         this.hideSettings();
       });
 
+    // Close saved words button
+    document
+      .getElementById('closeSavedWordsBtn')
+      .addEventListener('click', () => {
+        this.hideSavedWords();
+      });
+
     // Auto-pronounce toggle
     this.elements.autoPronounceToggle.addEventListener('change', () => {
       this.saveAutoPronounceSetting();
@@ -95,21 +124,34 @@ class SmartTranslate {
       this.saveShowSelectionIconSetting();
     });
 
+    // Default pronunciation toggle
+    this.elements.defaultPronunciation.addEventListener('change', () => {
+      this.saveDefaultPronunciationSetting();
+    });
+
+    // Show US pronunciation toggle
+    this.elements.showUsPronunciationToggle.addEventListener('change', () => {
+      this.saveShowUsPronunciationSetting();
+    });
+
+    // Show UK pronunciation toggle
+    this.elements.showUkPronunciationToggle.addEventListener('change', () => {
+      this.saveShowUkPronunciationSetting();
+    });
+
     // Translation source toggle
     this.elements.translationSource.addEventListener('change', () => {
       this.saveTranslationSourceSetting();
     });
 
     // Feature buttons
-    this.elements.pageTranslateBtn.addEventListener('click', () =>
-      this.translatePage()
-    );
-    this.elements.selectionBtn.addEventListener('click', () =>
-      this.translateSelection()
-    );
     this.elements.settingsBtn.addEventListener('click', () =>
-      this.openSettings()
+      this.showSettings()
     );
+    this.elements.savedWordsBtn.addEventListener('click', () =>
+      this.showSavedWords()
+    );
+    this.elements.saveWordBtn.addEventListener('click', () => this.saveWord());
 
     // Input events
     this.elements.inputText.addEventListener('input', () => this.handleInput());
@@ -131,6 +173,9 @@ class SmartTranslate {
         'autoPronounce',
         'autoTranslate',
         'showSelectionIcon',
+        'defaultPronunciation',
+        'showUsPronunciation',
+        'showUkPronunciation',
         'translationSource',
       ]);
       if (result.fromLang) {
@@ -165,6 +210,29 @@ class SmartTranslate {
       } else {
         // Default to true
         this.elements.showSelectionIconToggle.checked = true;
+      }
+
+      if (result.defaultPronunciation) {
+        this.elements.defaultPronunciation.value = result.defaultPronunciation;
+      } else {
+        // Default to GG
+        this.elements.defaultPronunciation.value = 'gg';
+      }
+
+      if (result.showUsPronunciation !== undefined) {
+        this.elements.showUsPronunciationToggle.checked =
+          result.showUsPronunciation;
+      } else {
+        // Default to true
+        this.elements.showUsPronunciationToggle.checked = true;
+      }
+
+      if (result.showUkPronunciation !== undefined) {
+        this.elements.showUkPronunciationToggle.checked =
+          result.showUkPronunciation;
+      } else {
+        // Default to true
+        this.elements.showUkPronunciationToggle.checked = true;
       }
 
       if (result.translationSource) {
@@ -241,6 +309,50 @@ class SmartTranslate {
     }
   }
 
+  async saveDefaultPronunciationSetting() {
+    try {
+      await chrome.storage.sync.set({
+        defaultPronunciation: this.elements.defaultPronunciation.value,
+      });
+      console.log(
+        'Default pronunciation setting saved:',
+        this.elements.defaultPronunciation.value
+      );
+    } catch (error) {
+      console.error('Error saving default pronunciation setting:', error);
+    }
+  }
+
+  async saveShowUsPronunciationSetting() {
+    try {
+      await chrome.storage.sync.set({
+        showUsPronunciation: this.elements.showUsPronunciationToggle.checked,
+      });
+      console.log(
+        'Show US pronunciation setting saved:',
+        this.elements.showUsPronunciationToggle.checked
+      );
+      this.updatePronunciationVisibility();
+    } catch (error) {
+      console.error('Error saving show US pronunciation setting:', error);
+    }
+  }
+
+  async saveShowUkPronunciationSetting() {
+    try {
+      await chrome.storage.sync.set({
+        showUkPronunciation: this.elements.showUkPronunciationToggle.checked,
+      });
+      console.log(
+        'Show UK pronunciation setting saved:',
+        this.elements.showUkPronunciationToggle.checked
+      );
+      this.updatePronunciationVisibility();
+    } catch (error) {
+      console.error('Error saving show UK pronunciation setting:', error);
+    }
+  }
+
   async saveTranslationSourceSetting() {
     try {
       await chrome.storage.sync.set({
@@ -273,6 +385,24 @@ class SmartTranslate {
     }
   }
 
+  updatePronunciationVisibility() {
+    // Show/hide US pronunciation
+    if (this.elements.usPronunciationItem) {
+      this.elements.usPronunciationItem.style.display = this.elements
+        .showUsPronunciationToggle.checked
+        ? 'block'
+        : 'none';
+    }
+
+    // Show/hide UK pronunciation
+    if (this.elements.ukPronunciationItem) {
+      this.elements.ukPronunciationItem.style.display = this.elements
+        .showUkPronunciationToggle.checked
+        ? 'block'
+        : 'none';
+    }
+  }
+
   swapLanguages() {
     const fromValue = this.elements.fromLang.value;
     const toValue = this.elements.toLang.value;
@@ -292,10 +422,11 @@ class SmartTranslate {
     // First translate the text
     await this.translateText();
 
-    // Then automatically pronounce in US accent after a short delay (if auto-pronounce is enabled)
+    // Then automatically pronounce in default accent after a short delay (if auto-pronounce is enabled)
     if (this.elements.autoPronounceToggle.checked) {
       setTimeout(() => {
-        this.pronounceWord('us');
+        const defaultAccent = this.elements.defaultPronunciation.value;
+        this.pronounceWord(defaultAccent);
       }, 1000); // Wait 1 second for translation to complete
     }
   }
@@ -764,6 +895,20 @@ class SmartTranslate {
   // Generate phonetic transcription using APIs
   async generatePhoneticTranscription(text, accent = 'us') {
     try {
+      // For GG, use the source language (the language being pronounced)
+      if (accent === 'gg') {
+        const sourceLang = this.elements.fromLang.value;
+        const displayLang =
+          sourceLang === 'auto' ? 'EN' : sourceLang.toUpperCase();
+        return `[${text}] (${displayLang})`;
+      }
+
+      // For US and UK, always use English
+      if (accent === 'us' || accent === 'uk') {
+        const accentText = accent === 'uk' ? 'UK' : 'US';
+        return `[${text}] (EN-${accentText})`;
+      }
+
       // Try multiple APIs for phonetic data
       const phoneticData = await this.getPhoneticFromAPIs(text, accent);
       return phoneticData;
@@ -866,13 +1011,29 @@ class SmartTranslate {
   showWordPronunciationInfo(accent) {
     const pronunciationDiv = document.getElementById('pronunciation');
     if (pronunciationDiv) {
-      const accentText = accent === 'uk' ? 'UK' : 'US';
-      const accentFlag = accent === 'uk' ? '🇬🇧' : '🇺🇸';
+      let accentText, accentFlag;
+
+      if (accent === 'gg') {
+        const sourceLang = this.elements.fromLang.value;
+        const displayLang =
+          sourceLang === 'auto' ? 'EN' : sourceLang.toUpperCase();
+        accentText = `Google (${displayLang})`;
+        accentFlag = '🌐';
+      } else if (accent === 'uk') {
+        accentText = 'UK English';
+        accentFlag = '🇬🇧';
+      } else if (accent === 'us') {
+        accentText = 'US English';
+        accentFlag = '🇺🇸';
+      } else {
+        accentText = 'English';
+        accentFlag = '🇺🇸';
+      }
 
       pronunciationDiv.innerHTML = `
                 <div class="pronunciation-info">
                     <span class="pronunciation-icon">🔊</span>
-                    <span class="pronunciation-text">Listening to ${accentText} English pronunciation ${accentFlag}</span>
+                    <span class="pronunciation-text">Listening to ${accentText} pronunciation ${accentFlag}</span>
                 </div>
             `;
       pronunciationDiv.style.display = 'block';
@@ -918,11 +1079,14 @@ class SmartTranslate {
         document.getElementById('forvoAPIKey').value = result.forvoAPIKey;
       }
 
-      // Also load auto-pronounce, auto-translate, and show selection icon settings
+      // Also load auto-pronounce, auto-translate, show selection icon, and pronunciation settings
       const settingsResult = await chrome.storage.sync.get([
         'autoPronounce',
         'autoTranslate',
         'showSelectionIcon',
+        'defaultPronunciation',
+        'showUsPronunciation',
+        'showUkPronunciation',
       ]);
       if (settingsResult.autoPronounce !== undefined) {
         this.elements.autoPronounceToggle.checked =
@@ -936,6 +1100,21 @@ class SmartTranslate {
         this.elements.showSelectionIconToggle.checked =
           settingsResult.showSelectionIcon;
       }
+      if (settingsResult.defaultPronunciation) {
+        this.elements.defaultPronunciation.value =
+          settingsResult.defaultPronunciation;
+      }
+      if (settingsResult.showUsPronunciation !== undefined) {
+        this.elements.showUsPronunciationToggle.checked =
+          settingsResult.showUsPronunciation;
+      }
+      if (settingsResult.showUkPronunciation !== undefined) {
+        this.elements.showUkPronunciationToggle.checked =
+          settingsResult.showUkPronunciation;
+      }
+
+      // Update pronunciation visibility after loading settings
+      this.updatePronunciationVisibility();
     } catch (error) {
       console.error('Error loading API keys:', error);
     }
@@ -968,6 +1147,7 @@ class SmartTranslate {
     this.elements.displayedWord.textContent = text;
 
     // Show loading state for phonetic transcription
+    this.elements.ggPhonetic.textContent = 'Loading...';
     this.elements.usPhonetic.textContent = 'Loading...';
     this.elements.ukPhonetic.textContent = 'Loading...';
 
@@ -976,14 +1156,17 @@ class SmartTranslate {
 
     try {
       // Generate and display phonetic transcription asynchronously
+      const ggPhonetic = await this.generatePhoneticTranscription(text, 'gg');
       const usPhonetic = await this.generatePhoneticTranscription(text, 'us');
       const ukPhonetic = await this.generatePhoneticTranscription(text, 'uk');
 
+      this.elements.ggPhonetic.textContent = ggPhonetic;
       this.elements.usPhonetic.textContent = usPhonetic;
       this.elements.ukPhonetic.textContent = ukPhonetic;
     } catch (error) {
       console.error('Failed to load phonetic transcription:', error);
       // Show fallback
+      this.elements.ggPhonetic.textContent = '[Loading failed]';
       this.elements.usPhonetic.textContent = '[Loading failed]';
       this.elements.ukPhonetic.textContent = '[Loading failed]';
     }
@@ -1081,47 +1264,86 @@ class SmartTranslate {
     this.showCopySuccess();
   }
 
-  // Pronounce the word
+  // Pronounce the word using Google TTS
   async pronounceWord(accent = 'us') {
     const word = this.elements.displayedWord.textContent;
     if (!word) return;
 
     try {
-      // Use Web Speech API for pronunciation
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang = this.getLanguageCodeWithAccent('en', accent);
-        utterance.rate = 0.8; // Slightly slower for clarity
-        utterance.pitch = 1.0;
+      // Show pronunciation info
+      this.showWordPronunciationInfo(accent);
 
-        // Show pronunciation info
-        this.showWordPronunciationInfo(accent);
-
-        // Speak the text
-        speechSynthesis.speak(utterance);
-
-        // Add visual feedback
-        const labelId =
-          accent === 'uk' ? 'ukPronunciationLabel' : 'usPronunciationLabel';
-        const originalHTML = this.elements[labelId].innerHTML;
-
-        // Show playing state
-        this.elements[labelId].style.opacity = '0.6';
-
-        setTimeout(() => {
-          // Restore original state
-          this.elements[labelId].style.opacity = '1';
-        }, 2000);
+      // Get language code for Google TTS
+      let languageCode;
+      if (accent === 'gg') {
+        // GG uses the source language (the language being pronounced)
+        languageCode = this.elements.fromLang.value;
+        // If auto-detect, default to English
+        if (languageCode === 'auto') {
+          languageCode = 'en';
+        }
+      } else if (accent === 'us' || accent === 'uk') {
+        // US and UK always use English with their respective accents
+        languageCode = accent === 'uk' ? 'en-GB' : 'en-US';
       } else {
-        this.showError('Speech synthesis not supported in this browser');
+        languageCode = this.getGoogleTTSLanguageCode('en', accent);
       }
+
+      // Create Google TTS URL
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+        word
+      )}&tl=${languageCode}&client=tw-ob`;
+
+      // Create audio element and play
+      const audio = new Audio(ttsUrl);
+
+      // Add visual feedback
+      let labelId;
+      if (accent === 'gg') {
+        labelId = 'ggPronunciationLabel';
+      } else if (accent === 'uk') {
+        labelId = 'ukPronunciationLabel';
+      } else {
+        labelId = 'usPronunciationLabel';
+      }
+
+      // Show playing state
+      this.elements[labelId].style.opacity = '0.6';
+      this.elements[labelId].style.transform = 'scale(1.1)';
+
+      // Play audio
+      await audio.play();
+
+      // Restore original state after audio finishes
+      audio.addEventListener('ended', () => {
+        this.elements[labelId].style.opacity = '1';
+        this.elements[labelId].style.transform = 'scale(1)';
+      });
+
+      // Fallback: restore state after 3 seconds if audio doesn't end properly
+      setTimeout(() => {
+        this.elements[labelId].style.opacity = '1';
+        this.elements[labelId].style.transform = 'scale(1)';
+      }, 3000);
     } catch (error) {
-      console.error('Word pronunciation failed:', error);
+      console.error('Google TTS pronunciation failed:', error);
       this.showError('Pronunciation failed. Please try again.');
+
+      // Restore visual state on error
+      let labelId;
+      if (accent === 'gg') {
+        labelId = 'ggPronunciationLabel';
+      } else if (accent === 'uk') {
+        labelId = 'ukPronunciationLabel';
+      } else {
+        labelId = 'usPronunciationLabel';
+      }
+      this.elements[labelId].style.opacity = '1';
+      this.elements[labelId].style.transform = 'scale(1)';
     }
   }
 
-  // Pronounce the translated text
+  // Pronounce the translated text using Google TTS
   async pronounceText(accent = 'us') {
     if (!this.currentTranslation) return;
 
@@ -1129,31 +1351,57 @@ class SmartTranslate {
       // Get the target language for pronunciation
       const targetLang = this.elements.toLang.value;
 
-      // Use Web Speech API for pronunciation
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(this.currentTranslation);
-        utterance.lang = this.getLanguageCodeWithAccent(targetLang, accent);
-        utterance.rate = 0.8; // Slightly slower for clarity
-        utterance.pitch = 1.0;
+      // Show pronunciation info
+      this.showPronunciationInfo(targetLang, accent);
 
-        // Show pronunciation info
-        this.showPronunciationInfo(targetLang, accent);
-
-        // Speak the text
-        speechSynthesis.speak(utterance);
-
-        // Add visual feedback
-        const buttonId = accent === 'uk' ? 'pronounceUkBtn' : 'pronounceUsBtn';
-        this.elements[buttonId].innerHTML = '<span>⏸️</span>';
-        setTimeout(() => {
-          this.elements[buttonId].innerHTML =
-            accent === 'uk' ? '<span>🇬🇧 🔊</span>' : '<span>🇺🇸 🔊</span>';
-        }, 2000);
+      // Get language code for Google TTS
+      let languageCode;
+      if (accent === 'gg') {
+        // GG uses the source language (the language being pronounced)
+        languageCode = this.elements.fromLang.value;
+        // If auto-detect, default to English
+        if (languageCode === 'auto') {
+          languageCode = 'en';
+        }
+      } else if (accent === 'us' || accent === 'uk') {
+        // US and UK always use English with their respective accents
+        languageCode = accent === 'uk' ? 'en-GB' : 'en-US';
       } else {
-        this.showError('Speech synthesis not supported in this browser');
+        languageCode = this.getGoogleTTSLanguageCode(targetLang, accent);
       }
+
+      // Create Google TTS URL
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+        this.currentTranslation
+      )}&tl=${languageCode}&client=tw-ob`;
+
+      // Create audio element and play
+      const audio = new Audio(ttsUrl);
+
+      // Add visual feedback
+      const buttonId = accent === 'uk' ? 'pronounceUkBtn' : 'pronounceUsBtn';
+      const originalHTML = this.elements[buttonId].innerHTML;
+
+      // Show playing state
+      this.elements[buttonId].innerHTML = '<span>⏸️</span>';
+      this.elements[buttonId].style.opacity = '0.6';
+
+      // Play audio
+      await audio.play();
+
+      // Restore original state after audio finishes
+      audio.addEventListener('ended', () => {
+        this.elements[buttonId].innerHTML = originalHTML;
+        this.elements[buttonId].style.opacity = '1';
+      });
+
+      // Fallback: restore state after 3 seconds if audio doesn't end properly
+      setTimeout(() => {
+        this.elements[buttonId].innerHTML = originalHTML;
+        this.elements[buttonId].style.opacity = '1';
+      }, 3000);
     } catch (error) {
-      console.error('Pronunciation failed:', error);
+      console.error('Google TTS pronunciation failed:', error);
       this.showError('Pronunciation failed. Please try again.');
     }
   }
@@ -1182,6 +1430,14 @@ class SmartTranslate {
   getLanguageCodeWithAccent(lang, accent = 'us') {
     if (lang === 'en') {
       return accent === 'uk' ? 'en-GB' : 'en-US'; // en-GB is the correct language code for UK English
+    }
+    return this.getLanguageCode(lang);
+  }
+
+  // Get Google TTS language code
+  getGoogleTTSLanguageCode(lang, accent = 'us') {
+    if (lang === 'en') {
+      return accent === 'uk' ? 'en-GB' : 'en-US';
     }
     return this.getLanguageCode(lang);
   }
@@ -1247,9 +1503,18 @@ class SmartTranslate {
         vi: 'Vietnamese',
       };
 
-      const accentText =
-        lang === 'en' ? ` (${accent.toUpperCase()} accent)` : '';
-      const accentFlag = lang === 'en' ? (accent === 'uk' ? '🇬🇧' : '🇺🇸') : '';
+      let accentText, accentFlag;
+      if (accent === 'gg') {
+        // GG shows source language
+        const sourceLang = this.elements.fromLang.value;
+        const displayLang = sourceLang === 'auto' ? 'en' : sourceLang;
+        const displayLangName = languageNames[displayLang] || displayLang;
+        accentText = ` (${displayLangName})`;
+        accentFlag = '🌐';
+      } else {
+        accentText = lang === 'en' ? ` (${accent.toUpperCase()} accent)` : '';
+        accentFlag = lang === 'en' ? (accent === 'uk' ? '🇬🇧' : '🇺🇸') : '';
+      }
 
       pronunciationDiv.innerHTML = `
                 <div class="pronunciation-info">
@@ -1265,50 +1530,6 @@ class SmartTranslate {
       setTimeout(() => {
         pronunciationDiv.style.display = 'none';
       }, 3000);
-    }
-  }
-
-  async translatePage() {
-    try {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: this.injectPageTranslation,
-      });
-      window.close();
-    } catch (error) {
-      console.error('Page translation failed:', error);
-      this.showError('Page translation failed. Please try again.');
-    }
-  }
-
-  async translateSelection() {
-    try {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      const result = await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: this.getSelectedText,
-      });
-
-      const selectedText = result[0]?.result;
-      if (selectedText && selectedText.trim()) {
-        this.elements.inputText.value = selectedText;
-        this.handleInput();
-        this.translateText();
-      } else {
-        this.showError(
-          'No text selected. Please select some text on the page first.'
-        );
-      }
-    } catch (error) {
-      console.error('Selection translation failed:', error);
-      this.showError('Selection translation failed. Please try again.');
     }
   }
 
@@ -1345,7 +1566,8 @@ class SmartTranslate {
         // Auto-pronounce if enabled
         if (this.elements.autoPronounceToggle.checked) {
           setTimeout(() => {
-            this.pronounceWord('us');
+            const defaultAccent = this.elements.defaultPronunciation.value;
+            this.pronounceWord(defaultAccent);
           }, 1500); // Wait 1.5s for translation to complete
         }
 
@@ -1397,7 +1619,8 @@ class SmartTranslate {
             // Auto-pronounce if enabled
             if (this.elements.autoPronounceToggle.checked) {
               setTimeout(() => {
-                this.pronounceWord('us');
+                const defaultAccent = this.elements.defaultPronunciation.value;
+                this.pronounceWord(defaultAccent);
               }, 1500); // Wait 1.5s for translation to complete
             }
           }
@@ -1410,19 +1633,157 @@ class SmartTranslate {
     }
   }
 
-  openSettings() {
-    // In a real extension, this would open a settings page
-    // For now, we'll just show a message
-    alert(
-      'Settings feature coming soon! This would include:\n• API key configuration\n• Default languages\n• Translation history\n• Theme preferences'
-    );
+  // Show saved words section
+  showSavedWords() {
+    this.elements.savedWordsSection.style.display = 'block';
+    this.loadSavedWords();
+  }
+
+  // Hide saved words section
+  hideSavedWords() {
+    this.elements.savedWordsSection.style.display = 'none';
+  }
+
+  // Save current word to vocabulary list
+  async saveWord() {
+    if (!this.currentTranslation || !this.elements.displayedWord.textContent) {
+      this.showError('No word to save');
+      return;
+    }
+
+    try {
+      const wordData = {
+        original: this.elements.displayedWord.textContent,
+        translation: this.currentTranslation,
+        fromLang: this.elements.fromLang.value,
+        toLang: this.elements.toLang.value,
+        timestamp: Date.now(),
+        id: Date.now().toString(),
+      };
+
+      // Get existing saved words
+      const result = await chrome.storage.local.get(['savedWords']);
+      const savedWords = result.savedWords || [];
+
+      // Check if word already exists
+      const existingIndex = savedWords.findIndex(
+        (word) =>
+          word.original.toLowerCase() === wordData.original.toLowerCase() &&
+          word.fromLang === wordData.fromLang &&
+          word.toLang === wordData.toLang
+      );
+
+      if (existingIndex !== -1) {
+        // Update existing word
+        savedWords[existingIndex] = wordData;
+      } else {
+        // Add new word
+        savedWords.push(wordData);
+      }
+
+      // Save to storage
+      await chrome.storage.local.set({ savedWords: savedWords });
+
+      // Show success message
+      this.showSaveSuccess();
+
+      console.log('Word saved successfully:', wordData);
+    } catch (error) {
+      console.error('Error saving word:', error);
+      this.showError('Failed to save word');
+    }
+  }
+
+  // Load and display saved words
+  async loadSavedWords() {
+    try {
+      const result = await chrome.storage.local.get(['savedWords']);
+      const savedWords = result.savedWords || [];
+
+      if (savedWords.length === 0) {
+        this.elements.savedWordsList.innerHTML =
+          '<p class="no-words">No saved words yet. Translate some words to get started!</p>';
+        return;
+      }
+
+      // Sort by timestamp (newest first)
+      savedWords.sort((a, b) => b.timestamp - a.timestamp);
+
+      const wordsHTML = savedWords
+        .map(
+          (word) => `
+        <div class="saved-word-item" data-id="${word.id}">
+          <div class="word-content">
+            <div class="word-original">${word.original}</div>
+            <div class="word-translation">${word.translation}</div>
+            <div class="word-languages">${word.fromLang.toUpperCase()} → ${word.toLang.toUpperCase()}</div>
+            <div class="word-date">${new Date(
+              word.timestamp
+            ).toLocaleDateString()}</div>
+          </div>
+          <div class="word-actions">
+            <button class="pronounce-btn" onclick="this.parentElement.parentElement.querySelector('.word-original').click()" title="Pronounce">
+              🔊
+            </button>
+            <button class="delete-btn" onclick="this.parentElement.parentElement.remove()" title="Delete">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `
+        )
+        .join('');
+
+      this.elements.savedWordsList.innerHTML = wordsHTML;
+
+      // Add click event to pronounce original words
+      this.elements.savedWordsList
+        .querySelectorAll('.word-original')
+        .forEach((element, index) => {
+          element.addEventListener('click', () => {
+            const word = savedWords[index];
+            this.pronounceSavedWord(word.original, word.fromLang);
+          });
+        });
+    } catch (error) {
+      console.error('Error loading saved words:', error);
+      this.elements.savedWordsList.innerHTML =
+        '<p class="error">Error loading saved words</p>';
+    }
+  }
+
+  // Pronounce saved word
+  async pronounceSavedWord(text, language) {
+    try {
+      const languageCode = language === 'auto' ? 'en' : language;
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+        text
+      )}&tl=${languageCode}&client=tw-ob`;
+
+      const audio = new Audio(ttsUrl);
+      await audio.play();
+    } catch (error) {
+      console.error('Error pronouncing saved word:', error);
+    }
+  }
+
+  // Show save success message
+  showSaveSuccess() {
+    const saveBtn = this.elements.saveWordBtn;
+    const originalHTML = saveBtn.innerHTML;
+
+    saveBtn.innerHTML = '<span>✓</span>';
+    saveBtn.classList.add('saved');
+
+    setTimeout(() => {
+      saveBtn.innerHTML = originalHTML;
+      saveBtn.classList.remove('saved');
+    }, 2000);
   }
 
   // Functions to be injected into web pages
-  static injectPageTranslation() {
-    // This function will be injected into the web page
-    console.log('Page translation feature would be implemented here');
-    alert('Page translation feature coming soon!');
+  static getSelectedText() {
+    return window.getSelection().toString();
   }
 
   static getSelectedText() {

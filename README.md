@@ -99,8 +99,9 @@ A powerful and modern browser extension for instant translation, similar to Goog
 - **UK Pronunciation**: Click 🇬🇧 🔊 button to hear UK English pronunciation
 - **Phonetic Guide**: View US [heˈloʊ] and UK [heˈlɔʊ] transcription
 - **Direct Access**: No need to select accent - just click the button for your preferred pronunciation
+- **Google TTS Quality**: Uses Google Translate's high-quality text-to-speech service
 - **Language-specific**: Uses appropriate voice for each language
-- **Clear pronunciation**: Optimized speed and pitch for clarity
+- **Clear pronunciation**: Professional-grade audio quality
 - **Visual feedback**: Shows which language and accent is being spoken
 
 ### Enhanced Translation Details
@@ -150,6 +151,15 @@ The extension uses multiple APIs to provide accurate phonetic transcriptions:
 - **Default**: Enabled by default for immediate translation
 - **Behavior**: When enabled, text is automatically translated when popup opens with text
 - **Customization**: Can be disabled if you prefer manual translation control
+
+#### **Text-to-Speech Technology:**
+
+- **Google TTS Integration**: Uses Google Translate's built-in text-to-speech service
+- **High Quality**: Professional-grade pronunciation quality
+- **No API Key Required**: Completely free to use
+- **Multiple Languages**: Supports all languages that Google Translate supports
+- **Accent Support**: US and UK English accents available
+- **Real-time Audio**: Instant pronunciation without delays
 
 #### **Selection Icon Setting:**
 

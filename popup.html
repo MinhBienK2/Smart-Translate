@@ -80,6 +80,13 @@
             
             <!-- Pronunciation Section -->
             <div class="pronunciation-section">
+                <div class="pronunciation-item" id="ggPronunciationItem">
+                    <div class="pronunciation-label" id="ggPronunciationLabel">
+                        <span class="label-text">GG</span>
+                        <span class="speaker-icon">🔊</span>
+                    </div>
+                    <div class="phonetic-text" id="ggPhonetic">[heˈloʊ]</div>
+                </div>
                 <div class="pronunciation-item" id="usPronunciationItem">
                     <div class="pronunciation-label" id="usPronunciationLabel">
                         <span class="label-text">US</span>
@@ -101,6 +108,9 @@
             <div class="result-header">
                 <h3>Translation</h3>
                 <div class="result-actions">
+                    <button id="saveWordBtn" class="save-btn" title="Save word to vocabulary list">
+                        <span>💾</span>
+                    </button>
                     <button id="copyBtn" class="copy-btn" title="Copy translation">
                         <span>📋</span>
                     </button>
@@ -188,25 +198,56 @@
                     </label>
                     <small>Show the floating translate icon when you select text on web pages</small>
                 </div>
+                
+                <div class="api-item">
+                    <label for="defaultPronunciation">Default Pronunciation:</label>
+                    <select id="defaultPronunciation" class="translation-source-select">
+                        <option value="gg">GG (Google Default)</option>
+                        <option value="us">US English</option>
+                        <option value="uk">UK English</option>
+                    </select>
+                    <small>Choose which pronunciation to use by default</small>
+                </div>
+                
+                <div class="api-item">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showUsPronunciationToggle" checked />
+                        <span class="checkmark"></span>
+                        Show US Pronunciation
+                    </label>
+                </div>
+                
+                <div class="api-item">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showUkPronunciationToggle" checked />
+                        <span class="checkmark"></span>
+                        Show UK Pronunciation
+                    </label>
+                </div>
             </div>
         </div>
 
-        <div class="features">
-            <button id="pageTranslateBtn" class="feature-btn">
-                <span class="icon">📄</span>
-                Translate Page
-            </button>
-            <button id="selectionBtn" class="feature-btn">
-                <span class="icon">✏️</span>
-                Translate Selection
-            </button>
+        <!-- Features section removed for cleaner interface -->
 
+        <!-- Saved Words Section -->
+        <div id="savedWordsSection" class="saved-words-section" style="display: none;">
+            <div class="saved-words-header">
+                <h3 style="color: #333333;">📚 Saved Words</h3>
+                <button id="closeSavedWordsBtn" class="close-btn" title="Close saved words" style="color: #333333;">✕</button>
+            </div>
+            <div id="savedWordsList" class="saved-words-list">
+                <!-- Saved words will be displayed here -->
+            </div>
         </div>
 
         <div class="settings">
             <button id="settingsBtn" class="settings-btn">
                 <span class="icon">⚙️</span>
                 Settings
+            </button>
+            <button id="savedWordsBtn" class="saved-words-btn">
+                <span class="icon">📚</span>
+                Saved Words
             </button>
         </div>
     </div>
