@@ -14,7 +14,7 @@ A powerful and modern browser extension for instant translation, similar to Goog
 ### Web Page Integration
 
 - **Text Selection Translation**: Select any text on web pages and translate instantly
-- **Floating Translation Button**: Appears when text is selected for quick access
+- **Floating Translation Button**: Appears when text is selected for quick access (configurable)
 - **Page Translation**: Translate entire web pages (coming soon)
 - **Context Menu Integration**: Right-click to translate selected text
 
@@ -151,6 +151,14 @@ The extension uses multiple APIs to provide accurate phonetic transcriptions:
 - **Behavior**: When enabled, text is automatically translated when popup opens with text
 - **Customization**: Can be disabled if you prefer manual translation control
 
+#### **Selection Icon Setting:**
+
+- **Toggle On/Off**: Check/uncheck "Show selection icon when text is selected"
+- **Default**: Enabled by default for immediate access
+- **Behavior**: When enabled, a floating 🌐 icon appears when you select text on web pages
+- **Customization**: Can be disabled if you prefer not to see the floating icon
+- **Real-time**: Setting takes effect immediately without page refresh
+
 ## 🛠️ Technical Details
 
 ### Architecture
@@ -201,7 +209,8 @@ const response = await fetch(
 "permissions": [
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "tabs"
 ]
 ```
 

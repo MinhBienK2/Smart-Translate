@@ -28,6 +28,9 @@ class SmartTranslate {
       autoFillStatus: document.getElementById('autoFillStatus'),
       autoPronounceToggle: document.getElementById('autoPronounceToggle'),
       autoTranslateToggle: document.getElementById('autoTranslateToggle'),
+      showSelectionIconToggle: document.getElementById(
+        'showSelectionIconToggle'
+      ),
       translationSource: document.getElementById('translationSource'),
     };
 
@@ -87,6 +90,11 @@ class SmartTranslate {
       this.saveAutoTranslateSetting();
     });
 
+    // Show selection icon toggle
+    this.elements.showSelectionIconToggle.addEventListener('change', () => {
+      this.saveShowSelectionIconSetting();
+    });
+
     // Translation source toggle
     this.elements.translationSource.addEventListener('change', () => {
       this.saveTranslationSourceSetting();
@@ -122,6 +130,7 @@ class SmartTranslate {
         'forvoAPIKey',
         'autoPronounce',
         'autoTranslate',
+        'showSelectionIcon',
         'translationSource',
       ]);
       if (result.fromLang) {
@@ -148,6 +157,14 @@ class SmartTranslate {
       } else {
         // Default to true
         this.elements.autoTranslateToggle.checked = true;
+      }
+
+      if (result.showSelectionIcon !== undefined) {
+        this.elements.showSelectionIconToggle.checked =
+          result.showSelectionIcon;
+      } else {
+        // Default to true
+        this.elements.showSelectionIconToggle.checked = true;
       }
 
       if (result.translationSource) {
@@ -207,6 +224,23 @@ class SmartTranslate {
     }
   }
 
+  async saveShowSelectionIconSetting() {
+    try {
+      await chrome.storage.sync.set({
+        showSelectionIcon: this.elements.showSelectionIconToggle.checked,
+      });
+      console.log(
+        'Show selection icon setting saved:',
+        this.elements.showSelectionIconToggle.checked
+      );
+
+      // Send message to content script to update the setting
+      this.updateContentScriptSetting();
+    } catch (error) {
+      console.error('Error saving show selection icon setting:', error);
+    }
+  }
+
   async saveTranslationSourceSetting() {
     try {
       await chrome.storage.sync.set({
@@ -218,6 +252,24 @@ class SmartTranslate {
       );
     } catch (error) {
       console.error('Error saving translation source setting:', error);
+    }
+  }
+
+  async updateContentScriptSetting() {
+    try {
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      if (tab && tab.id) {
+        await chrome.tabs.sendMessage(tab.id, {
+          action: 'updateSelectionIconSetting',
+          showSelectionIcon: this.elements.showSelectionIconToggle.checked,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating content script setting:', error);
     }
   }
 
@@ -866,10 +918,11 @@ class SmartTranslate {
         document.getElementById('forvoAPIKey').value = result.forvoAPIKey;
       }
 
-      // Also load auto-pronounce and auto-translate settings
+      // Also load auto-pronounce, auto-translate, and show selection icon settings
       const settingsResult = await chrome.storage.sync.get([
         'autoPronounce',
         'autoTranslate',
+        'showSelectionIcon',
       ]);
       if (settingsResult.autoPronounce !== undefined) {
         this.elements.autoPronounceToggle.checked =
@@ -878,6 +931,10 @@ class SmartTranslate {
       if (settingsResult.autoTranslate !== undefined) {
         this.elements.autoTranslateToggle.checked =
           settingsResult.autoTranslate;
+      }
+      if (settingsResult.showSelectionIcon !== undefined) {
+        this.elements.showSelectionIconToggle.checked =
+          settingsResult.showSelectionIcon;
       }
     } catch (error) {
       console.error('Error loading API keys:', error);

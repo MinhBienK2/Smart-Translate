@@ -6,6 +6,7 @@ class ContentTranslate {
     this.init();
     this.bindEvents();
     this.createFloatingButton();
+    this.loadSettings();
   }
 
   init() {
@@ -14,6 +15,7 @@ class ContentTranslate {
     this.translationOverlay = null;
     this.selectedText = '';
     this.currentPosition = { x: 0, y: 0 };
+    this.showSelectionIcon = true; // Default to true
   }
 
   bindEvents() {
@@ -26,11 +28,29 @@ class ContentTranslate {
       if (request.action === 'translateSelection') {
         this.translateSelectedText();
         sendResponse({ success: true });
+      } else if (request.action === 'updateSelectionIconSetting') {
+        this.showSelectionIcon = request.showSelectionIcon;
+        // Hide the button if the setting is turned off
+        if (!this.showSelectionIcon) {
+          this.hideFloatingButton();
+        }
+        sendResponse({ success: true });
       }
     });
 
     // Handle right-click context menu
     document.addEventListener('contextmenu', (e) => this.handleContextMenu(e));
+  }
+
+  async loadSettings() {
+    try {
+      const result = await chrome.storage.sync.get(['showSelectionIcon']);
+      if (result.showSelectionIcon !== undefined) {
+        this.showSelectionIcon = result.showSelectionIcon;
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
   }
 
   handleTextSelection(e) {
@@ -40,7 +60,11 @@ class ContentTranslate {
     if (selectedText && selectedText.length > 0) {
       this.selectedText = selectedText;
       this.currentPosition = { x: e.pageX, y: e.pageY };
-      this.showFloatingButton();
+
+      // Only show the floating button if the setting is enabled
+      if (this.showSelectionIcon) {
+        this.showFloatingButton();
+      }
 
       // Store selected text immediately for popup access
       chrome.storage.local.set({
@@ -66,7 +90,9 @@ class ContentTranslate {
     // This would add a custom context menu item
     // For now, we'll just show the floating button
     setTimeout(() => {
-      this.showFloatingButton();
+      if (this.showSelectionIcon) {
+        this.showFloatingButton();
+      }
     }, 100);
   }
 
