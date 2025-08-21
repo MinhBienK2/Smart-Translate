@@ -921,21 +921,6 @@ body {
   font-weight: 600;
 }
 
-.close-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-
-.close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .saved-words-list {
   padding: 20px;
   max-height: 60vh;

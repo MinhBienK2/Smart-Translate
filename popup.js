@@ -56,10 +56,6 @@ class SmartTranslate {
     this.isTranslating = false;
     this.currentTranslation = '';
 
-    // API keys for phonetic data
-    this.wordsAPIKey = '';
-    this.forvoAPIKey = '';
-
     // Auto-focus on input field when popup opens
     this.elements.inputText.focus();
   }
@@ -168,8 +164,6 @@ class SmartTranslate {
       const result = await chrome.storage.sync.get([
         'fromLang',
         'toLang',
-        'wordsAPIKey',
-        'forvoAPIKey',
         'autoPronounce',
         'autoTranslate',
         'showSelectionIcon',
@@ -184,12 +178,7 @@ class SmartTranslate {
       if (result.toLang) {
         this.elements.toLang.value = result.toLang;
       }
-      if (result.wordsAPIKey) {
-        this.wordsAPIKey = result.wordsAPIKey;
-      }
-      if (result.forvoAPIKey) {
-        this.forvoAPIKey = result.forvoAPIKey;
-      }
+
       if (result.autoPronounce !== undefined) {
         this.elements.autoPronounceToggle.checked = result.autoPronounce;
       } else {
@@ -947,52 +936,28 @@ class SmartTranslate {
       console.log('Free Dictionary API failed, trying alternatives...');
     }
 
-    // Try WordsAPI (requires API key but more comprehensive)
+    // Try Free Dictionary API (free, reliable)
     try {
-      if (this.wordsAPIKey) {
-        const response = await fetch(
-          `https://wordsapiv1.p.rapidapi.com/words/${word}/pronunciation`,
-          {
-            headers: {
-              'X-RapidAPI-Key': this.wordsAPIKey,
-              'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com',
-            },
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          if (data.pronunciation && data.pronunciation.all) {
-            return `[${data.pronunciation.all}]`;
+      const response = await fetch(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (
+          data &&
+          data[0] &&
+          data[0].phonetics &&
+          data[0].phonetics.length > 0
+        ) {
+          // Get the first phonetic transcription
+          const phonetic = data[0].phonetics[0].text;
+          if (phonetic) {
+            return phonetic;
           }
         }
       }
     } catch (error) {
-      console.log('WordsAPI failed...');
-    }
-
-    // Try Forvo API for pronunciation (requires API key)
-    try {
-      if (this.forvoAPIKey) {
-        const response = await fetch(
-          `https://apifree.forvo.com/key/${this.forvoAPIKey}/format/json/action/word-pronunciations/word/${word}/language/en`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.length > 0) {
-            // Get pronunciation based on accent preference
-            const pronunciations = data.filter((p) =>
-              accent === 'uk'
-                ? p.country === 'United Kingdom'
-                : p.country === 'United States'
-            );
-            if (pronunciations.length > 0) {
-              return `[${pronunciations[0].pronunciation}]`;
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.log('Forvo API failed...');
+      console.log('Free Dictionary API failed, trying alternatives...');
     }
 
     // If all APIs fail, throw error to trigger fallback
@@ -1049,8 +1014,6 @@ class SmartTranslate {
   showSettings() {
     const settingsSection = document.getElementById('settingsSection');
     if (settingsSection) {
-      // Load current API keys
-      this.loadAPIKeys();
       settingsSection.style.display = 'block';
     }
   }
@@ -1059,85 +1022,7 @@ class SmartTranslate {
   hideSettings() {
     const settingsSection = document.getElementById('settingsSection');
     if (settingsSection) {
-      // Save API keys before hiding
-      this.saveAPIKeys();
       settingsSection.style.display = 'none';
-    }
-  }
-
-  // Load API keys from storage
-  async loadAPIKeys() {
-    try {
-      const result = await chrome.storage.sync.get([
-        'wordsAPIKey',
-        'forvoAPIKey',
-      ]);
-      if (result.wordsAPIKey) {
-        document.getElementById('wordsAPIKey').value = result.wordsAPIKey;
-      }
-      if (result.forvoAPIKey) {
-        document.getElementById('forvoAPIKey').value = result.forvoAPIKey;
-      }
-
-      // Also load auto-pronounce, auto-translate, show selection icon, and pronunciation settings
-      const settingsResult = await chrome.storage.sync.get([
-        'autoPronounce',
-        'autoTranslate',
-        'showSelectionIcon',
-        'defaultPronunciation',
-        'showUsPronunciation',
-        'showUkPronunciation',
-      ]);
-      if (settingsResult.autoPronounce !== undefined) {
-        this.elements.autoPronounceToggle.checked =
-          settingsResult.autoPronounce;
-      }
-      if (settingsResult.autoTranslate !== undefined) {
-        this.elements.autoTranslateToggle.checked =
-          settingsResult.autoTranslate;
-      }
-      if (settingsResult.showSelectionIcon !== undefined) {
-        this.elements.showSelectionIconToggle.checked =
-          settingsResult.showSelectionIcon;
-      }
-      if (settingsResult.defaultPronunciation) {
-        this.elements.defaultPronunciation.value =
-          settingsResult.defaultPronunciation;
-      }
-      if (settingsResult.showUsPronunciation !== undefined) {
-        this.elements.showUsPronunciationToggle.checked =
-          settingsResult.showUsPronunciation;
-      }
-      if (settingsResult.showUkPronunciation !== undefined) {
-        this.elements.showUkPronunciationToggle.checked =
-          settingsResult.showUkPronunciation;
-      }
-
-      // Update pronunciation visibility after loading settings
-      this.updatePronunciationVisibility();
-    } catch (error) {
-      console.error('Error loading API keys:', error);
-    }
-  }
-
-  // Save API keys to storage
-  async saveAPIKeys() {
-    try {
-      const wordsAPIKey = document.getElementById('wordsAPIKey').value;
-      const forvoAPIKey = document.getElementById('forvoAPIKey').value;
-
-      await chrome.storage.sync.set({
-        wordsAPIKey: wordsAPIKey || '',
-        forvoAPIKey: forvoAPIKey || '',
-      });
-
-      // Update the instance variables
-      this.wordsAPIKey = wordsAPIKey;
-      this.forvoAPIKey = forvoAPIKey;
-
-      console.log('API keys saved successfully');
-    } catch (error) {
-      console.error('Error saving API keys:', error);
     }
   }
 
@@ -1779,6 +1664,55 @@ class SmartTranslate {
       saveBtn.innerHTML = originalHTML;
       saveBtn.classList.remove('saved');
     }, 2000);
+  }
+
+  // Test WordsAPI connection
+  async testWordsAPI() {
+    const keyInput = document.getElementById('wordsAPIKey');
+    const testBtn = document.getElementById('testWordsAPIBtn');
+    const originalText = testBtn.textContent;
+
+    if (!keyInput.value.trim()) {
+      alert('Please enter a WordsAPI key first!');
+      return;
+    }
+
+    testBtn.textContent = 'Testing...';
+    testBtn.disabled = true;
+
+    try {
+      console.log(
+        '🧪 Testing WordsAPI with key:',
+        keyInput.value.substring(0, 10) + '...'
+      );
+
+      const response = await fetch(
+        'https://wordsapiv1.p.rapidapi.com/words/hello/pronunciation',
+        {
+          headers: {
+            'X-RapidAPI-Key': keyInput.value,
+            'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com',
+          },
+        }
+      );
+
+      console.log('📡 Test response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Test response data:', data);
+        alert('✅ WordsAPI test successful! Key is working.');
+      } else {
+        console.error('❌ Test failed with status:', response.status);
+        alert(`❌ WordsAPI test failed! Status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('💥 Test error:', error);
+      alert('💥 Test failed! Check console for details.');
+    } finally {
+      testBtn.textContent = originalText;
+      testBtn.disabled = false;
+    }
   }
 
   // Functions to be injected into web pages
