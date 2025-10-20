@@ -6,6 +6,9 @@ class SavedWordsManager {
     this.savedWords = [];
     this.maxWords = 100;
     // Don't call loadSavedWords here, it will be called explicitly
+
+    // Keep a single bound handler to avoid duplicate event triggers
+    this._listClickHandler = null;
   }
 
   /**
@@ -251,7 +254,12 @@ class SavedWordsManager {
   bindSavedWordsEvents(container, callbacks = {}) {
     if (!container) return;
 
-    container.addEventListener('click', (e) => {
+    // Remove previous handler if exists to prevent duplicate bindings
+    if (this._listClickHandler) {
+      container.removeEventListener('click', this._listClickHandler);
+    }
+
+    this._listClickHandler = (e) => {
       const actionBtn = e.target.closest('.action-btn');
       if (!actionBtn) return;
 
@@ -273,7 +281,9 @@ class SavedWordsManager {
           }
           break;
       }
-    });
+    };
+
+    container.addEventListener('click', this._listClickHandler);
   }
 
   /**
