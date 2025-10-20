@@ -64,6 +64,7 @@ class SmartTranslate {
         this.handleSaveWord(word, translation, fromLang, toLang),
       onInputChange: () => this.handleInputChange(),
       onShowSavedWords: () => this.showSavedWords(),
+      onExportSavedWords: () => this.exportSavedWordsTxt(),
     });
   }
 
@@ -346,6 +347,31 @@ class SmartTranslate {
         onDeleteWord: (wordId) => this.handleDeleteWord(wordId),
       }
     );
+  }
+
+  /**
+   * Export saved words as .txt and download
+   */
+  exportSavedWordsTxt() {
+    try {
+      const content = this.savedWordsManager.exportAsTxt();
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      const date = new Date().toISOString().slice(0, 10);
+      a.download = `saved-words-${date}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      this.uiManager.showNotification('Exported saved words', 'success');
+    } catch (error) {
+      console.error('Export saved words failed:', error);
+      this.uiManager.showNotification('Export failed', 'error');
+    }
   }
 
   /**

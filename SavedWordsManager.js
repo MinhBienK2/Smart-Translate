@@ -31,6 +31,23 @@ class SavedWordsManager {
   }
 
   /**
+   * Export saved words to txt string
+   */
+  exportAsTxt() {
+    if (!this.savedWords || this.savedWords.length === 0) {
+      return 'No saved words';
+    }
+
+    // Format: word \t translation \t from->to \t YYYY-MM-DD
+    const lines = this.savedWords.map((w) => {
+      const date = this.formatDate(w.timestamp);
+      return `${w.word}\t${w.translation}`;
+    });
+
+    return lines.join('\n');
+  }
+
+  /**
    * Save saved words vào Chrome storage
    */
   async saveSavedWords() {

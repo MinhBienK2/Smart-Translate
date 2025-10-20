@@ -883,3 +883,15 @@ body {
 .saved-words-btn .icon {
   font-size: 14px;
 }
+
+.export-saved-words-btn {
+  padding: 2px 4px;
+  background: none;
+  color: #333333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}

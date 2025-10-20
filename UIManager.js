@@ -62,6 +62,7 @@ class UIManager {
       // Saved words section
       savedWordsSection: document.getElementById('savedWordsSection'),
       savedWordsBtn: document.getElementById('savedWordsBtn'),
+      exportSavedWordsBtn: document.getElementById('exportSavedWordsBtn'),
       closeSavedWordsBtn: document.getElementById('closeSavedWordsBtn'),
       savedWordsList: document.getElementById('savedWordsList'),
     };
@@ -137,6 +138,13 @@ class UIManager {
       this.elements.savedWordsBtn.addEventListener('click', () => {
         if (this.callbacks && this.callbacks.onShowSavedWords) {
           this.callbacks.onShowSavedWords();
+        }
+      });
+    }
+    if (this.elements.exportSavedWordsBtn) {
+      this.elements.exportSavedWordsBtn.addEventListener('click', () => {
+        if (this.callbacks && this.callbacks.onExportSavedWords) {
+          this.callbacks.onExportSavedWords();
         }
       });
     }
