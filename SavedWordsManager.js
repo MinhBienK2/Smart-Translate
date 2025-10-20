@@ -41,10 +41,13 @@ class SavedWordsManager {
       return 'No saved words';
     }
 
-    // Format: word \t translation \t from->to \t YYYY-MM-DD
+    const maxWordLength = Math.max(
+      ...this.savedWords.map((w) => w.word.length)
+    );
+
     const lines = this.savedWords.map((w) => {
-      const date = this.formatDate(w.timestamp);
-      return `${w.word}\t${w.translation}`;
+      const paddedWord = w.word.padEnd(maxWordLength + 2, ' ');
+      return `${paddedWord} -> ${w.translation}`;
     });
 
     return lines.join('\n');

@@ -41,8 +41,7 @@ class SmartTranslate {
       // Check for auto-fill text
       await this.checkAutoFill();
 
-      // Update pronunciation visibility
-      this.updatePronunciationVisibility();
+      // Pronunciation settings removed; default to Google TTS
 
       console.log('Smart Translate initialized successfully');
     } catch (error) {
@@ -241,9 +240,7 @@ class SmartTranslate {
         });
         break;
 
-      case 'showUsPronunciation':
-      case 'showUkPronunciation':
-        this.updatePronunciationVisibility();
+        // removed pronunciation UI toggles
         break;
     }
   }
@@ -288,13 +285,7 @@ class SmartTranslate {
     }
   }
 
-  /**
-   * Update pronunciation visibility
-   */
-  updatePronunciationVisibility() {
-    const settings = this.settingsManager.getAllSettings();
-    this.uiManager.updatePronunciationVisibility(settings);
-  }
+  // Removed: updatePronunciationVisibility (US/UK toggles no longer supported)
 
   /**
    * Check if text is a single word
@@ -388,8 +379,7 @@ class SmartTranslate {
    * Handle saved word pronounce
    */
   handleSavedWordPronounce(word) {
-    const accent = this.settingsManager.getSetting('defaultPronunciation');
-    this.handlePronounce(word.word, accent);
+    this.handlePronounce(word.word, 'gg');
   }
 
   /**

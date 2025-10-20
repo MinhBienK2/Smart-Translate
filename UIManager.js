@@ -26,14 +26,6 @@ class UIManager {
       wordDisplay: document.getElementById('wordDisplay'),
       displayedWord: document.getElementById('displayedWord'),
       ggPronunciationLabel: document.getElementById('ggPronunciationLabel'),
-      usPronunciationLabel: document.getElementById('usPronunciationLabel'),
-      ukPronunciationLabel: document.getElementById('ukPronunciationLabel'),
-      ggPronunciationItem: document.getElementById('ggPronunciationItem'),
-      usPronunciationItem: document.getElementById('usPronunciationItem'),
-      ukPronunciationItem: document.getElementById('ukPronunciationItem'),
-      ggPhonetic: document.getElementById('ggPhonetic'),
-      usPhonetic: document.getElementById('usPhonetic'),
-      ukPhonetic: document.getElementById('ukPhonetic'),
 
       // Result section
       resultSection: document.getElementById('resultSection'),
@@ -96,16 +88,7 @@ class UIManager {
         this.onPronounceClick('gg');
       });
     }
-    if (this.elements.usPronunciationLabel) {
-      this.elements.usPronunciationLabel.addEventListener('click', () => {
-        this.onPronounceClick('us');
-      });
-    }
-    if (this.elements.ukPronunciationLabel) {
-      this.elements.ukPronunciationLabel.addEventListener('click', () => {
-        this.onPronounceClick('uk');
-      });
-    }
+    // Removed US/UK label listeners
 
     // Copy button
     if (this.elements.copyBtn) {
@@ -278,18 +261,7 @@ class UIManager {
   /**
    * Update pronunciation visibility based on settings
    */
-  updatePronunciationVisibility(settings) {
-    if (!settings) return;
-
-    if (this.elements.usPronunciationItem) {
-      this.elements.usPronunciationItem.style.display =
-        settings.showUsPronunciation ? 'block' : 'none';
-    }
-    if (this.elements.ukPronunciationItem) {
-      this.elements.ukPronunciationItem.style.display =
-        settings.showUkPronunciation ? 'block' : 'none';
-    }
-  }
+  // Removed: updatePronunciationVisibility
 
   /**
    * Show translation result

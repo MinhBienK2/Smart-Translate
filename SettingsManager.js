@@ -9,9 +9,7 @@ class SettingsManager {
       autoPronounce: true,
       autoTranslate: true,
       showSelectionIcon: true,
-      defaultPronunciation: 'gg',
-      showUsPronunciation: true,
-      showUkPronunciation: true,
+      // Pronunciation simplified to Google only
       translationSource: 'google',
     };
 
@@ -101,19 +99,7 @@ class SettingsManager {
       elements.showSelectionIconToggle.checked =
         this.settings.showSelectionIcon;
     }
-    if (elements.showUsPronunciationToggle) {
-      elements.showUsPronunciationToggle.checked =
-        this.settings.showUsPronunciation;
-    }
-    if (elements.showUkPronunciationToggle) {
-      elements.showUkPronunciationToggle.checked =
-        this.settings.showUkPronunciation;
-    }
-
-    // Select settings
-    if (elements.defaultPronunciation) {
-      elements.defaultPronunciation.value = this.settings.defaultPronunciation;
-    }
+    // Removed US/UK pronunciation UI and defaultPronunciation
     if (elements.translationSource) {
       elements.translationSource.value = this.settings.translationSource;
     }
@@ -147,14 +133,6 @@ class SettingsManager {
       { element: elements.autoPronounceToggle, key: 'autoPronounce' },
       { element: elements.autoTranslateToggle, key: 'autoTranslate' },
       { element: elements.showSelectionIconToggle, key: 'showSelectionIcon' },
-      {
-        element: elements.showUsPronunciationToggle,
-        key: 'showUsPronunciation',
-      },
-      {
-        element: elements.showUkPronunciationToggle,
-        key: 'showUkPronunciation',
-      },
     ];
 
     toggleElements.forEach(({ element, key }) => {
@@ -169,20 +147,7 @@ class SettingsManager {
     });
 
     // Select events
-    if (elements.defaultPronunciation) {
-      elements.defaultPronunciation.addEventListener('change', async () => {
-        await this.updateSetting(
-          'defaultPronunciation',
-          elements.defaultPronunciation.value
-        );
-        if (callbacks.onSettingChange) {
-          callbacks.onSettingChange(
-            'defaultPronunciation',
-            elements.defaultPronunciation.value
-          );
-        }
-      });
-    }
+    // Removed defaultPronunciation change listener
 
     if (elements.translationSource) {
       elements.translationSource.addEventListener('change', async () => {
