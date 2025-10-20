@@ -104,7 +104,6 @@ class SmartTranslate {
       // Show word display for single words
       if (this.isSingleWord(text)) {
         this.uiManager.showWordDisplay(text);
-        await this.loadPhonetics(text, fromLang);
       } else {
         this.uiManager.hideWordDisplay();
       }
@@ -284,21 +283,6 @@ class SmartTranslate {
       }
     } catch (error) {
       console.error('Error checking auto-fill:', error);
-    }
-  }
-
-  /**
-   * Load phonetics for word
-   */
-  async loadPhonetics(word, fromLang) {
-    try {
-      const phonetics = await this.translationManager.getPhoneticTranscription(
-        word,
-        fromLang
-      );
-      this.uiManager.updatePhonetics(phonetics);
-    } catch (error) {
-      console.error('Error loading phonetics:', error);
     }
   }
 

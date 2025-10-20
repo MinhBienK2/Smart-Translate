@@ -120,47 +120,6 @@ class SettingsManager {
   }
 
   /**
-   * Load settings từ UI elements
-   */
-  loadSettingsFromUI(elements) {
-    // Language settings
-    if (elements.fromLang) {
-      this.settings.defaultFromLang = elements.fromLang.value;
-    }
-    if (elements.toLang) {
-      this.settings.defaultToLang = elements.toLang.value;
-    }
-
-    // Toggle settings
-    if (elements.autoPronounceToggle) {
-      this.settings.autoPronounce = elements.autoPronounceToggle.checked;
-    }
-    if (elements.autoTranslateToggle) {
-      this.settings.autoTranslate = elements.autoTranslateToggle.checked;
-    }
-    if (elements.showSelectionIconToggle) {
-      this.settings.showSelectionIcon =
-        elements.showSelectionIconToggle.checked;
-    }
-    if (elements.showUsPronunciationToggle) {
-      this.settings.showUsPronunciation =
-        elements.showUsPronunciationToggle.checked;
-    }
-    if (elements.showUkPronunciationToggle) {
-      this.settings.showUkPronunciation =
-        elements.showUkPronunciationToggle.checked;
-    }
-
-    // Select settings
-    if (elements.defaultPronunciation) {
-      this.settings.defaultPronunciation = elements.defaultPronunciation.value;
-    }
-    if (elements.translationSource) {
-      this.settings.translationSource = elements.translationSource.value;
-    }
-  }
-
-  /**
    * Bind events cho settings UI
    */
   bindSettingsEvents(elements, callbacks = {}) {

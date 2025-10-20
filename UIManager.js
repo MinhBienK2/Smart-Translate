@@ -266,21 +266,6 @@ class UIManager {
   }
 
   /**
-   * Update phonetic transcription
-   */
-  updatePhonetics(phonetics) {
-    if (this.elements.ggPhonetic) {
-      this.elements.ggPhonetic.textContent = phonetics.gg || '[Not available]';
-    }
-    if (this.elements.usPhonetic) {
-      this.elements.usPhonetic.textContent = phonetics.us || '[Not available]';
-    }
-    if (this.elements.ukPhonetic) {
-      this.elements.ukPhonetic.textContent = phonetics.uk || '[Not available]';
-    }
-  }
-
-  /**
    * Update pronunciation visibility based on settings
    */
   updatePronunciationVisibility(settings) {
