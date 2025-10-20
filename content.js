@@ -54,26 +54,33 @@ class ContentTranslate {
   }
 
   handleTextSelection(e) {
-    const selection = window.getSelection();
-    const selectedText = selection.toString().trim();
+    // Use setTimeout to ensure selection is complete
+    setTimeout(() => {
+      const selection = window.getSelection();
+      const selectedText = selection.toString().trim();
 
-    if (selectedText && selectedText.length > 0) {
-      this.selectedText = selectedText;
-      this.currentPosition = { x: e.pageX, y: e.pageY };
+      if (selectedText && selectedText.length > 0) {
+        this.selectedText = selectedText;
+        this.currentPosition = { x: e.pageX, y: e.pageY };
 
-      // Only show the floating button if the setting is enabled
-      if (this.showSelectionIcon) {
-        this.showFloatingButton();
+        // Only show the floating button if the setting is enabled
+        if (this.showSelectionIcon) {
+          this.showFloatingButton();
+        }
+
+        // Store selected text immediately for popup access
+        chrome.storage.local
+          .set({
+            selectedText: selectedText,
+            selectionTimestamp: Date.now(),
+          })
+          .catch((error) => {
+            console.error('Error saving selected text:', error);
+          });
+      } else {
+        this.hideFloatingButton();
       }
-
-      // Store selected text immediately for popup access
-      chrome.storage.local.set({
-        selectedText: selectedText,
-        selectionTimestamp: Date.now(),
-      });
-    } else {
-      this.hideFloatingButton();
-    }
+    }, 10);
   }
 
   handleContextMenu(e) {
