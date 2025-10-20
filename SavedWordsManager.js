@@ -5,7 +5,7 @@ class SavedWordsManager {
   constructor() {
     this.savedWords = [];
     this.maxWords = 100;
-    this.loadSavedWords();
+    // Don't call loadSavedWords here, it will be called explicitly
   }
 
   /**
@@ -21,6 +21,13 @@ class SavedWordsManager {
       this.savedWords = [];
       return this.savedWords;
     }
+  }
+
+  /**
+   * Get saved words array
+   */
+  getSavedWords() {
+    return this.savedWords;
   }
 
   /**
@@ -180,7 +187,14 @@ class SavedWordsManager {
    * Render saved words list vào UI
    */
   renderSavedWordsList(container) {
-    if (!container) return;
+    console.log('renderSavedWordsList called with container:', container);
+    console.log('savedWords length:', this.savedWords.length);
+    console.log('savedWords:', this.savedWords);
+
+    if (!container) {
+      console.error('Container is null or undefined');
+      return;
+    }
 
     if (this.savedWords.length === 0) {
       container.innerHTML = `
@@ -197,28 +211,14 @@ class SavedWordsManager {
       .map(
         (word) => `
       <div class="saved-word-item" data-word-id="${word.id}">
-        <div class="word-content">
-          <div class="word-main">
-            <span class="word-text">${this.escapeHtml(word.word)}</span>
-            <span class="word-translation">${this.escapeHtml(
-              word.translation
-            )}</span>
-          </div>
-          <div class="word-meta">
-            <span class="word-lang">${word.fromLang} → ${word.toLang}</span>
-            <span class="word-date">${this.formatDate(word.timestamp)}</span>
-          </div>
-        </div>
+        <div class="word-text">${this.escapeHtml(word.word)}</div>
+        <div class="word-translation">${this.escapeHtml(word.translation)}</div>
         <div class="word-actions">
-          <button class="word-action-btn" data-action="translate" title="Translate again">
-            🔄
-          </button>
-          <button class="word-action-btn" data-action="pronounce" title="Pronounce">
-            🔊
-          </button>
-          <button class="word-action-btn" data-action="delete" title="Delete">
-            🗑️
-          </button>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div class="word-lang">${word.fromLang} → ${word.toLang}</div>
+            <button class="action-btn" data-action="pronounce" title="Pronounce">🔊</button>
+          </div>
+          <button class="action-btn" data-action="delete" title="Delete">🗑️</button>
         </div>
       </div>
     `
@@ -235,7 +235,7 @@ class SavedWordsManager {
     if (!container) return;
 
     container.addEventListener('click', (e) => {
-      const actionBtn = e.target.closest('.word-action-btn');
+      const actionBtn = e.target.closest('.action-btn');
       if (!actionBtn) return;
 
       const wordItem = actionBtn.closest('.saved-word-item');
@@ -243,13 +243,6 @@ class SavedWordsManager {
       const action = actionBtn.dataset.action;
 
       switch (action) {
-        case 'translate':
-          if (callbacks.onTranslateWord) {
-            const word = this.getWordById(wordId);
-            callbacks.onTranslateWord(word);
-          }
-          break;
-
         case 'pronounce':
           if (callbacks.onPronounceWord) {
             const word = this.getWordById(wordId);

@@ -63,6 +63,7 @@ class SmartTranslate {
       onSaveWord: (word, translation, fromLang, toLang) =>
         this.handleSaveWord(word, translation, fromLang, toLang),
       onInputChange: () => this.handleInputChange(),
+      onShowSavedWords: () => this.showSavedWords(),
     });
   }
 
@@ -322,6 +323,10 @@ class SmartTranslate {
    * Show saved words
    */
   showSavedWords() {
+    console.log('showSavedWords called');
+    console.log('savedWordsManager:', this.savedWordsManager);
+    console.log('savedWords:', this.savedWordsManager.getSavedWords());
+
     this.uiManager.showSavedWords();
     this.savedWordsManager.renderSavedWordsList(
       this.uiManager.getElements().savedWordsList

@@ -135,7 +135,9 @@ class UIManager {
     // Saved words buttons
     if (this.elements.savedWordsBtn) {
       this.elements.savedWordsBtn.addEventListener('click', () => {
-        this.showSavedWords();
+        if (this.callbacks && this.callbacks.onShowSavedWords) {
+          this.callbacks.onShowSavedWords();
+        }
       });
     }
     if (this.elements.closeSavedWordsBtn) {
@@ -419,8 +421,14 @@ class UIManager {
    * Show saved words section
    */
   showSavedWords() {
+    console.log('UIManager.showSavedWords called');
+    console.log('savedWordsSection element:', this.elements.savedWordsSection);
+
     if (this.elements.savedWordsSection) {
       this.elements.savedWordsSection.style.display = 'block';
+      console.log('Saved words section displayed');
+    } else {
+      console.error('savedWordsSection element not found');
     }
   }
 
