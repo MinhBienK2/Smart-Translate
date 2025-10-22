@@ -102,12 +102,8 @@ class SmartTranslate {
       this.uiManager.setTranslating(true);
       this.uiManager.hideResult();
 
-      // Show word display for single words
-      if (this.isSingleWord(text)) {
-        this.uiManager.showWordDisplay(text);
-      } else {
-        this.uiManager.hideWordDisplay();
-      }
+      // Show word display for all translations
+      this.uiManager.showWordDisplay(text);
 
       // Translate text
       const result = await this.translationManager.translateText(
@@ -120,15 +116,9 @@ class SmartTranslate {
         this.uiManager.showResult(result.translation);
 
         // Auto-pronounce if enabled
-        if (
-          this.settingsManager.getSetting('autoPronounce') &&
-          this.isSingleWord(text)
-        ) {
-          const defaultAccent = this.settingsManager.getSetting(
-            'defaultPronunciation'
-          );
+        if (this.settingsManager.getSetting('autoPronounce')) {
           setTimeout(() => {
-            this.handlePronounce(text, defaultAccent);
+            this.handlePronounce(text);
           }, 500);
         }
       }
