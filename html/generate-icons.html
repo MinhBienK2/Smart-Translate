@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Smart Translate Icons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+        }
+        .preview {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .icon-preview {
+            text-align: center;
+        }
+        .icon-preview canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .icon-preview label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Smart Translate Icon Generator</h1>
+        
+        <div class="instructions">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li>Click "Generate All Icons" to create the icon previews</li>
+                <li>Right-click on each icon and select "Save image as..."</li>
+                <li>Save them as: <code>icon16.png</code>, <code>icon48.png</code>, <code>icon128.png</code></li>
+                <li>Place them in the <code>icons/</code> folder</li>
+            </ol>
+        </div>
+
+        <div class="buttons">
+            <button onclick="generateAllIcons()">Generate All Icons</button>
+            <button onclick="downloadAll()">Download All Icons</button>
+        </div>
+
+        <div class="preview" id="preview">
+            <div class="icon-preview">
+                <canvas id="icon16" width="16" height="16"></canvas>
+                <label>16x16</label>
+            </div>
+            <div class="icon-preview">
+                <canvas id="icon48" width="48" height="48"></canvas>
+                <label>48x48</label>
+            </div>
+            <div class="icon-preview">
+                <canvas id="icon128" width="128" height="128"></canvas>
+                <label>128x128</label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const center = size / 2;
+            const radius = size * 0.45;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            
+            // Draw background circle
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = size * 0.02;
+            ctx.stroke();
+            
+            // Draw globe outline
+            ctx.beginPath();
+            ctx.arc(center, center, radius * 0.55, 0, Math.PI * 2);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = size * 0.025;
+            ctx.globalAlpha = 0.9;
+            ctx.stroke();
+            
+            // Draw latitude lines
+            ctx.globalAlpha = 0.7;
+            ctx.lineWidth = size * 0.015;
+            
+            // Top latitude
+            ctx.beginPath();
+            ctx.ellipse(center, center - radius * 0.25, radius * 0.45, radius * 0.12, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Middle latitude
+            ctx.beginPath();
+            ctx.ellipse(center, center, radius * 0.55, radius * 0.15, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Bottom latitude
+            ctx.beginPath();
+            ctx.ellipse(center, center + radius * 0.25, radius * 0.45, radius * 0.12, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Draw longitude lines (simplified)
+            ctx.beginPath();
+            ctx.arc(center, center, radius * 0.55, Math.PI * 0.3, Math.PI * 0.7);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(center, center, radius * 0.55, Math.PI * 1.3, Math.PI * 1.7);
+            ctx.stroke();
+            
+            // Draw translation arrows (only for larger sizes)
+            if (size >= 48) {
+                ctx.globalAlpha = 1;
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = size * 0.02;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                // Top-left arrow (EN)
+                const arrowSize = size * 0.15;
+                const x1 = center - radius * 0.4;
+                const y1 = center - radius * 0.4;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x1 + arrowSize, y1);
+                ctx.lineTo(x1 + arrowSize * 0.8, y1 - arrowSize * 0.3);
+                ctx.moveTo(x1 + arrowSize, y1);
+                ctx.lineTo(x1 + arrowSize * 0.8, y1 + arrowSize * 0.3);
+                ctx.stroke();
+                
+                // Bottom-right arrow (VI)
+                const x2 = center + radius * 0.15;
+                const y2 = center + radius * 0.15;
+                
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2, y2 + arrowSize);
+                ctx.lineTo(x2 - arrowSize * 0.3, y2 + arrowSize * 0.8);
+                ctx.moveTo(x2, y2 + arrowSize);
+                ctx.lineTo(x2 + arrowSize * 0.3, y2 + arrowSize * 0.8);
+                ctx.stroke();
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function generateAllIcons() {
+            drawIcon(document.getElementById('icon16'), 16);
+            drawIcon(document.getElementById('icon48'), 48);
+            drawIcon(document.getElementById('icon128'), 128);
+        }
+        
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function downloadAll() {
+            generateAllIcons();
+            setTimeout(() => {
+                downloadCanvas(document.getElementById('icon16'), 'icon16.png');
+                setTimeout(() => {
+                    downloadCanvas(document.getElementById('icon48'), 'icon48.png');
+                    setTimeout(() => {
+                        downloadCanvas(document.getElementById('icon128'), 'icon128.png');
+                    }, 300);
+                }, 300);
+            }, 100);
+        }
+        
+        // Auto-generate on load
+        window.onload = function() {
+            generateAllIcons();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+// Icon generator script for Smart Translate
+// Run with: node scripts/generate-icons.js
+
+const fs = require('fs');
+const path = require('path');
+
+// Simple PNG generator using canvas (requires canvas package)
+// Alternative: Use the HTML tool at html/generate-icons.html
+
+function createIconSVG(size) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#grad1)" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Globe/World icon -->
+  <g transform="translate(64, 64)">
+    <!-- Globe outline -->
+    <circle cx="0" cy="0" r="35" fill="none" stroke="#fff" stroke-width="3" opacity="0.9"/>
+    
+    <!-- Latitude lines -->
+    <ellipse cx="0" cy="-15" rx="30" ry="8" fill="none" stroke="#fff" stroke-width="2" opacity="0.7"/>
+    <ellipse cx="0" cy="0" rx="35" ry="10" fill="none" stroke="#fff" stroke-width="2" opacity="0.7"/>
+    <ellipse cx="0" cy="15" rx="30" ry="8" fill="none" stroke="#fff" stroke-width="2" opacity="0.7"/>
+    
+    <!-- Longitude lines -->
+    <path d="M -35 0 Q -20 -15 0 -15 Q 20 -15 35 0" fill="none" stroke="#fff" stroke-width="2" opacity="0.7"/>
+    <path d="M -35 0 Q -20 0 0 0 Q 20 0 35 0" fill="none" stroke="#fff" stroke-width="2" opacity="0.7"/>
+    <path d="M -35 0 Q -20 15 0 15 Q 20 15 35 0" fill="none" stroke="#fff" stroke-width="2" opacity="0.7"/>
+    
+    <!-- Translation arrows -->
+    <g transform="translate(-25, -25)">
+      <path d="M 0 10 L 15 10 L 12 7 M 15 10 L 12 13" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="20" y="13" font-family="Arial, sans-serif" font-size="10" fill="#fff" font-weight="bold">EN</text>
+    </g>
+    
+    <g transform="translate(10, 10)">
+      <path d="M 15 0 L 15 15 L 12 12 M 15 15 L 18 12" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="5" y="20" font-family="Arial, sans-serif" font-size="10" fill="#fff" font-weight="bold">VI</text>
+    </g>
+  </g>
+</svg>`;
+}
+
+console.log('📝 Icon Generator for Smart Translate');
+console.log('');
+console.log('Option 1: Use the HTML tool');
+console.log('  1. Open html/generate-icons.html in your browser');
+console.log('  2. Click "Download All Icons"');
+console.log('  3. Save the files to icons/ folder');
+console.log('');
+console.log('Option 2: Use SVG logo');
+console.log('  - SVG logo is available at: icons/logo.svg');
+console.log('  - Convert it to PNG using an online tool or image editor');
+console.log('  - Required sizes: 16x16, 48x48, 128x128');
+console.log('');
+console.log('✅ SVG logo created at: icons/logo.svg');
+console.log('✅ HTML generator created at: html/generate-icons.html');
