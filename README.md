@@ -247,11 +247,16 @@ extension-translate/
 ├── manifest.json          # Extension configuration
 ├── popup.html            # Main popup interface
 ├── popup.css             # Popup styling
-├── popup.js              # Popup functionality
-├── content.js            # Content script for web pages
-├── content.css           # Content script styling
-├── background.js         # Background service worker
-├── welcome.html          # Welcome/onboarding page
+├── scripts/              # JavaScript files
+│   ├── popup.js          # Popup functionality
+│   ├── content.js        # Content script for web pages
+│   ├── background.js     # Background service worker
+│   └── managers/         # Manager classes
+├── styles/               # CSS files
+│   ├── popup.css         # Popup styling
+│   └── content.css       # Content script styling
+├── html/                 # HTML pages
+│   └── welcome.html      # Welcome/onboarding page
 ├── icons/                # Extension icons
 │   ├── icon16.png
 │   ├── icon48.png

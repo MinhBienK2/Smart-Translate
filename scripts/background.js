@@ -132,7 +132,7 @@ class BackgroundTranslate {
           try {
             await chrome.scripting.executeScript({
               target: { tabId: tabId },
-              files: ['content.js'],
+              files: ['scripts/content.js'],
             });
           } catch (error) {
             // Content script might already be injected
@@ -328,7 +328,7 @@ class BackgroundTranslate {
   async showWelcomePage() {
     try {
       await chrome.tabs.create({
-        url: chrome.runtime.getURL('welcome.html'),
+        url: chrome.runtime.getURL('html/welcome.html'),
       });
     } catch (error) {
       console.error('Failed to show welcome page:', error);

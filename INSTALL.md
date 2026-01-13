@@ -41,7 +41,7 @@
 
 ## 🎯 Quick Test
 
-1. **Open** the `demo.html` file in your browser
+1. **Visit any website** (e.g., news article, blog post)
 2. **Select** any text on the page
 3. **Look** for the floating translation button
 4. **Click** the extension icon to open the popup
